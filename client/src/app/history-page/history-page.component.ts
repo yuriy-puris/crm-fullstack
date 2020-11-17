@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MaterialInstance, MaterialService } from '../shared/classes/material.service';
-import { Order } from '../shared/interfaces';
+import { Filter, Order } from '../shared/interfaces';
 import { OrdersService } from '../shared/services/orders.service';
 
 const STEP = 2;
@@ -23,6 +23,7 @@ export class HistoryPageComponent implements OnInit, OnDestroy, AfterViewInit {
   offset = 0;
   limit = STEP;
   noMoreOrders: boolean = false;
+  filter: Filter = {};
 
   constructor(
     private ordersService: OrdersService
@@ -43,10 +44,10 @@ export class HistoryPageComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private fetch() {
-    const params = {
+    const params = Object.assign({}, this.filter, {
       offset: this.offset,
       limit: this.limit
-    };
+    });
     this.oSub = this.ordersService.fetch(params).subscribe(orders => {
       this.orders = this.orders.concat(orders);
       this.noMoreOrders = orders.length < STEP;
@@ -59,6 +60,18 @@ export class HistoryPageComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loading = true;
     this.offset += STEP;
     this.fetch();
+  }
+
+  applyFilter( filter: Filter ) {
+    this.orders = [];
+    this.offset = 0;
+    this.filter = filter;
+    this.reloading = true;
+    this.fetch();
+  }
+
+  isFiltered(): Boolean {
+    return Object.keys(this.filter).length !== 0;
   }
 
 }
