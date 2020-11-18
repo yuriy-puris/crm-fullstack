@@ -1,4 +1,5 @@
-module.exports = {
-    mongoURI: 'mongodb://yuriy_puris:puris9@ds261136.mlab.com:61136/crm-commerce',
-    jwt: 'dev-jwt'
+if ( process.env.NODE_ENV === 'production' ) {
+    module.exports = require('./keys.prod');
+} else {
+    module.exports = require('./keys.dev');
 }
