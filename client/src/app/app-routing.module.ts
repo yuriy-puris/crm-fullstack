@@ -51,7 +51,7 @@ const routes: Routes = [
         path: 'history',
         component: HistoryPageComponent
       },
-      {
+      { 
         path: 'order',
         component: OrderPageComponent,
         children: [
