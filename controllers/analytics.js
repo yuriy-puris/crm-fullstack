@@ -4,7 +4,7 @@ const errorHandler = require('../utils/errorHandler');
 
 module.exports.overview = async (req, res) => {
     try {
-        const allOrders = await Order.find({ user: req.user.id }).sort(1);
+        const allOrders = await Order.find({ user: req.user.id }).sort({ date: 1 });
         const ordersMap = getOrdersMap(allOrders);
         const yesterdayOrders = ordersMap[moment().add(-1, 'd').format('DD.MM.YYYY')] || [];
 
@@ -50,15 +50,38 @@ module.exports.overview = async (req, res) => {
     }
 };
 
-module.exports.analytics = (req, res) => {
+module.exports.analytics = async (req, res) => {
+    try {
+        const allOrders = await Order.find({ user: req.user.id }).sort({ date: 1 });
+        const ordersMap = getOrdersMap(allOrders);
 
+        const average = +(calculatePrice(allOrders) / Object.keys(ordersMap).length).toFixed(2);
+
+        const chart = Object.keys(ordersMap).map(label => {
+            const gain = calculatePrice(ordersMap[label]);
+            const order = ordersMap[label].length;
+
+            return {
+                label,
+                order,
+                gain
+            }
+        });
+
+        res.status(200).json({
+            average,
+            chart
+        })
+    } catch (err) {
+        errorHandler(res, err);
+    }
 };
 
 function getOrdersMap(orders = []) {
     const daysOrders = {};
     orders.forEach(order => {
         const day = moment(order.date).format('DD.MM.YYYY');
-        if ( date === moment().format('DD.MM.YYYY') ) return;
+        if ( day === moment().format('DD.MM.YYYY') ) return;
         if ( !daysOrders[day] ) {
             daysOrders[day] = [];
         }
